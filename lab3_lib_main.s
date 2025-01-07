@@ -1,38 +1,118 @@
-// NOTES
-// rax 64-bit register, eax 32-bit register, ax 16-bit register, al 8-bit register
-// syffix b byte(8bit), w word(16bit), l long(32bit/64bitflyt), q quad(64bit)
+.section .data
+headMsg:    .asciz  "Start av testprogram. Skriv in 5 tal!"
+endMsg:     .asciz  "Testprogram slut"
+buf:        .space  64
+sum:        .quad   0
+temp:       .quad   0
+count:      .quad   0
+inpos:      .quad   0
+MAXPOS:     .quad   64
+inbuf:      .space  64
+outbuf:     .space  64
+buf_empty:  .quad   1
+outpos:     .quad   0
 
+.section .text
+.global main_start
 
+main_start:
+    # Call putText with headMsg
+    movq    $headMsg, %rdi
+    call    putText
 
-.data
-headMsg:    .asciz "Start av testprogram. Skriv in 5 tal!"
-endMsg:     .asciz "Testprogram slut"
-buf:        .space 64
-inbuf:      .space 64
-outbuf:     .space 64
+    # Call outImage
+    call    outImage
 
+    # Call inImage
+    call    inImage
 
-.text
-.global inImage
-inImage:
-	movq 	$inbuf, %rdi    # lägg i buf, där buf är en bit reserverat minne
-    movq 	MAXPOS,%rsi     # högst 5-1=4 tecken (NULL räknas ju också)
-    movq 	stdin, %rdx     # från standard input stdin=$0 om ej def
-    call    fgets
+    # Exit the program
+    movq    $60, %rax       # syscall: exit
+    xorq    %rdi, %rdi      # status: 0
+    syscall
 
-	ret
-
-
-.global outImage
-outImage:
-
-    ret
-
+# Function: putText
 .global putText
 putText:
-    movq %rdi, %r10
+    movq    %rdi, %r15
+clean_blank:
+    cmpb    $' ', (%r15)
+    jne     iter
+    incq    %r15
+    jmp     clean_blank
+iter:
+    cmpb    $0, (%r15)
+    je      end_iter
+    movb    (%r15), %dil
+    call    putChar
+    incq    %r15
+    jmp     iter
+end_iter:
+    ret
 
+# Function: outImage
+.global outImage
+outImage:
+    pushq   %rbp
+    movq    %rsp, %rbp
+    movq    $outbuf, %rdi
+    call    puts
+    movq    $0, outpos
+    popq    %rbp
+    ret
 
+# Function: inImage
+.global inImage
+inImage:
+    movq    $inbuf, %rdi
+    movq    $MAXPOS, %rsi
+    movq    stdin, %rdx          # stdin
+    call    fgets
+    movq    $0, inpos
+    ret
 
+# Function: putChar
+.global putChar
+putChar:
+    call    check_outpos
+    movq    $outbuf, %r8
+    addq    outpos, %r8
+    movb    %dil, (%r8)
+    incq    outpos
+    ret
 
+# Function: check_outpos
+.global check_outpos
+check_outpos:
+    movq    outpos, %rax
+    cmpq    MAXPOS, %rax
+    jl      less
+    call    outImage
+less:
+    ret
+
+# Implement missing functions
+.global getInt, getOutPos, setOutPos, putInt, getText
+
+getInt:
+    # Dummy implementation
+    movq $0, %rax
+    ret
+
+getOutPos:
+    # Dummy implementation
+    movq outpos, %rax
+    ret
+
+setOutPos:
+    # Dummy implementation
+    movq %rdi, outpos
+    ret
+
+putInt:
+    # Dummy implementation
+    ret
+
+getText:
+    # Dummy implementation
     ret

@@ -3,14 +3,15 @@ headMsg:	.asciz	"Start av testprogram. Skriv in 5 tal!"
 endMsg:	.asciz	"Slut pa testprogram"
 buf:	.space	64
 sum:	.quad	0
-count:	.quad	0
 temp:	.quad	0
+count:	.quad	0
+inpos:	.quad	0
 MAXPOS:	.quad	64
 inbuf:	.space	64
 outbuf:	.space	64
 buf_empty:	.quad	1
 outpos:	.quad	0
-inpos:	.quad	0
+
 
 
 .text
