@@ -1,36 +1,48 @@
-# Filnamn på ditt I/O-bibliotek (ändra namn om du vill)
-LIB_FILE=lab3_lib.s
+CC = gcc
+AS = as
+CFLAGS = -Wall -g -no-pie
+LDFLAGS = -no-pie
+ASFLAGS = 
 
-# Namn på körbara testprogram (ändra namn om du vill)
-OUT_ASM=asmTest
-OUT_C=cTest
+# Targets
+TARGET = test_STD
+TEST_T_TARGET = test_t
+OBJS = lab3_lib_main.o test_STD.o
+TEST_T_OBJS = test_t.o
 
-# Kompilator, assemblator och länkare
-CC=gcc
-AS=as
-LD=ld
+# Default target
+all: $(TARGET) $(TEST_T_TARGET)
 
-# Options för kompilering och länkning
-CFLAGS=-g
-LFLAGS=-no-pie
+# Link the object files to create the executable
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
-# Kompilera för båda testprogrammen
-all: $(OUT_ASM) $(OUT_C)
+# Compile the C source file to an object file
+test_STD.o: test_STD.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-# Kompilera med testprogrammet Mprov64.s (assembler-programmet)
-$(OUT_ASM): *.s
-	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@ 
+# Assemble the assembly source file to an object file
+lab3_lib_main.o: lab3_lib_main.s
+	$(AS) $(ASFLAGS) -o $@ $<
 
-# Kompilera med testprogrammet test_prog.c (C-programmet)
-$(OUT_C): $(LIB_FILE) *.c *.h
-	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $@ 
+# Assemble the test_t.s file to an object file
+test_t.o: test_t.s
+	$(AS) $(ASFLAGS) -o $@ $<
 
-# Packar ihop alla filer inför inlämning
-submission: *.s *.c *.h Makefile
-	tar czf submission.tgz *.s *.c *.h Makefile
+# Link the test_t object file to create the executable
+$(TEST_T_TARGET): $(TEST_T_OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^
 
-# Rensa projektkatalogen från temporära filer
+# Run the tests
+test: $(TARGET)
+	./$(TARGET)
+
+# Run the special test for test_t
+test_t: $(TEST_T_TARGET)
+	./$(TEST_T_TARGET)
+
+# Clean up the build files
 clean:
-		rm -f $(OUT_ASM)
-		rm -f $(OUT_C)
-		rm -f *.o
+	rm -f $(OBJS) $(TEST_T_OBJS) $(TARGET) $(TEST_T_TARGET)
+
+.PHONY: all clean test test_t

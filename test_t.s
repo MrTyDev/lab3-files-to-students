@@ -29,7 +29,7 @@ outImage:
 	movq	$outbuf, %rdi
 	call	puts
 	movq	$0,outpos
-	popq	%rax
+	popb	%rax
 	ret
 
 .global putText
@@ -209,6 +209,4 @@ setInPos:
 	no_negative:
 		movq %rdi,inpos
 	ret
-
-
 

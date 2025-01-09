@@ -4,13 +4,9 @@
 
 #include "my_iolib.h"
 
-extern void main_start();
-
 
 int main(){
 
-    main_start();
-    return 0;
     char headMsg[] = "Start av testprogram. Skriv in 5 tal!";
     char endMsg[] = "Testprogram slut";
     char buf[64];
